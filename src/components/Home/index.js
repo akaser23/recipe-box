@@ -5,6 +5,7 @@ function Home() {
   // React States
   const [errorMessages, setErrorMessages] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isRegister, setIsRegister] = useState(false);
 
   // User Login info
   const database = [
@@ -51,9 +52,16 @@ function Home() {
     name === errorMessages.name && (
       <div className="error">{errorMessages.message}</div>
     );
+  
+  // Generate button to switch between register and login forms
+  const formSwitch = (
+      <button className="button" onClick={() => setIsRegister(!isRegister)}>
+        {isRegister ? 'Already a Member? Log in' : 'Not registered yet? Join now!'}
+      </button>
+  );
 
   // JSX code for login form
-  const renderForm = (
+  const renderLoginForm = (
     <div className="form">
       <form onSubmit={handleSubmit}>
         <div className="input-container">
@@ -73,11 +81,44 @@ function Home() {
     </div>
   );
 
+  const renderRegisterForm = (
+    <div className="form">
+      <form onSubmit={handleSubmit}>
+        <div className="input-container">
+          <label>First Name </label>
+          <input type="text" name="firstName" required />
+        </div>
+        <div className="input-container">
+          <label>Last Name </label>
+          <input type="text" name="lastName" required />
+        </div>
+        <div className="input-container">
+          <label>Username </label>
+          <input type="text" name="uname" required />
+        </div>
+        <div className="input-container">
+          <label>Password </label>
+          <input type="password" name="pass" required />
+        </div>
+        <div className="input-container">
+          <label>Confirm Password </label>
+          <input type="password" name="confirmPass" required />
+        </div>
+        <div className="button-container">
+          <input type="submit" />
+        </div>
+      </form>
+    </div>
+  );
+
   return (
     <div className="app">
       <div className="login-form">
-        <div className="title">Sign In</div>
-        {isSubmitted ? <div>User is successfully logged in</div> : renderForm}
+        <div className="title">{isRegister ? 'Register' : 'Login'}</div>
+        {isRegister ? renderRegisterForm : renderLoginForm}
+      </div>
+      <div>
+        {formSwitch}
       </div>
     </div>
   );
