@@ -6,6 +6,8 @@ function Home() {
   const [errorMessages, setErrorMessages] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginFailed, setLoginFailed] = useState(false);
 
   // User Login info
   const database = [
@@ -52,23 +54,36 @@ function Home() {
     //Prevent page reload
     event.preventDefault();
 
-    var { uname, pass } = document.forms[0];
+    //Move form data from login into json
+    const formData = new FormData(event.target);
+    const object = {};
+    formData.forEach(function (value, key) {
+      object[key] = value;
+    });
+    const json = JSON.stringify(object);
 
-    // Find user login info
-    const userData = database.find((user) => user.username === uname.value);
+    console.log(json);
+    console.log(object);
 
-    // Compare user info
-    if (userData) {
-      if (userData.password !== pass.value) {
-        // Invalid password
-        setErrorMessages({ name: "pass", message: errors.pass });
-      } else {
-        setIsSubmitted(true);
-      }
-    } else {
-      // Username not found
-      setErrorMessages({ name: "uname", message: errors.uname });
+    // Call mango db api to see if user/password combo exists
+    const loginAttempt = async () => {
+        let result = await fetch('http://localhost:5000/login', {
+          method: 'post',
+          body: json,
+          headers: {
+            'Content-Type' : 'application/json'
+          }
+        });
+        result = await result.json();
+        if (result.status === 'login successful') {
+          setIsLoggedIn(true);
+          setLoginFailed(false);
+        } else {
+          setLoginFailed(true);
+        }
+
     }
+    loginAttempt();
   };
 
   // Generate JSX code for error message
@@ -91,12 +106,13 @@ function Home() {
         <div className="input-container">
           <label>Username </label>
           <input type="text" name="uname" required />
-          {renderErrorMessage("uname")}
         </div>
         <div className="input-container">
           <label>Password </label>
-          <input type="password" name="pass" required />
-          {renderErrorMessage("pass")}
+          <input type="password" name="password" required />
+          <div className="error">
+          {loginFailed ? 'We don\'t recognize that email/password, please try again or reset your password' : ''}
+          </div>
         </div>
         <div className="button-container">
           <input type="submit" />
@@ -135,6 +151,13 @@ function Home() {
     </div>
   );
 
+  const loggedInHomePage = (
+    <div>
+      <p>you are logged in!</p>
+    </div>
+  );
+  
+
   return (
     <div className="app">
       <div className="login-form">
@@ -143,6 +166,7 @@ function Home() {
       </div>
       <div>
         {formSwitch}
+        {isLoggedIn ? loggedInHomePage : ''}
       </div>
     </div>
   );
